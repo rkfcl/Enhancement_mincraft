@@ -1,0 +1,4 @@
+name: weaponenhancement
+version: '${project.version}'
+main: weaponenhancement.weaponenhancement.Weaponenhancement
+api-version: 1.19
