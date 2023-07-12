@@ -7,6 +7,7 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -40,7 +41,7 @@ public class EnhancementButton implements Listener {
 
         if (clickedInventory == null) return;
 
-        // 메뉴 상점
+        //  강화
         if (event.getView().getTitle().equalsIgnoreCase("강화")) {
             Inventory enhancementInventory = event.getView().getTopInventory();
             ItemStack targetSlotItem = enhancementInventory.getItem(10);
@@ -54,8 +55,26 @@ public class EnhancementButton implements Listener {
                 // 클릭한 인벤토리가 플레이어 인벤토리인 경우
                 event.setCancelled(true); // 이벤트 취소하여 아이템을 옮기지 못하도록 함
             }
-            if (event.getSlot() == 43){
-                if (targetSlotItem != null && targetSlotItem2 != null){
+            if (event.getSlot() == 43) {
+                if (targetSlotItem != null && targetSlotItem2 != null) {
+                    ItemMeta itemMeta1 = targetSlotItem.getItemMeta();
+                    if (itemMeta1.hasLore()) {
+                        List<String> lore = itemMeta1.getLore();
+                        String firstLine = null;
+                        if (!lore.isEmpty()) {
+                            firstLine = lore.get(0);
+                        }
+                        int starCount = 0;
+                        if (firstLine != null) {
+                            starCount = (int) firstLine.chars().filter(ch -> ch == '★').count();
+                        }
+                        // 별 개수가 10개 이상이면 강화를 중지합니다.
+                        if (starCount >= 10) {
+                            player.sendMessage("아이템은 이미 완전히 강화되었습니다.");
+                            return;
+                        }
+                    }
+
                     // 클릭 소리 재생
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
                     player.playSound(player.getLocation(), "minecraft:block.note_block.harp", SoundCategory.MASTER, 1.0f, 2.0f);
@@ -64,107 +83,222 @@ public class EnhancementButton implements Listener {
                     enhancementInventory.setItem(41, InvenDecoWHITE_STAINED_GLASS_PANE());
                     enhancementInventory.setItem(48, InvenDecoWHITE_STAINED_GLASS_PANE());
                     enhancementInventory.setItem(50, InvenDecoWHITE_STAINED_GLASS_PANE());
-                    //순치적으로 바뀜
+                    // 순서적으로 바뀜
                     enhancementInventory.setItem(38, InvenDecoBLACK_STAINED_GLASS_PANE());
                     new BukkitRunnable() {
-                        int slot =0;
+                        int slot = 0;
                         private long delay = 3L;
                         private long currentTick = 0L;
+
                         @Override
                         public void run() {
+                            ItemMeta itemMeta1 = targetSlotItem.getItemMeta();
+                            int starCount = 0;
+                            if (itemMeta1.hasLore()) {
+                                List<String> lore = itemMeta1.getLore();
+                                String firstLine = null;
+                                if (!lore.isEmpty()) {
+                                    firstLine = lore.get(0);
+                                }
+
+                                if (firstLine != null) {
+                                    starCount = (int) firstLine.chars().filter(ch -> ch == '★').count();
+                                }
+
+                            }
                             if (currentTick % delay == 0) {
                                 // 아이템을 한 슬롯씩 이동시킴
-                                if (slot>10) {
+                                if (slot > 10) {
                                     enhancementInventory.setItem(PANE_SLOTS[slot], InvenDecoGREEN_STAINED_GLASS_PANE());
-                                }else {
+                                } else {
                                     enhancementInventory.setItem(PANE_SLOTS[slot], InvenDecoBLACK_STAINED_GLASS_PANE());
                                 }
                                 if (delay == 3L) {
                                     player.playSound(player.getLocation(), "minecraft:block.note_block.harp", SoundCategory.MASTER, 1.0f, 0.5f);
-                                }else if (delay == 1L) {
+                                } else if (delay == 1L) {
                                     player.playSound(player.getLocation(), "minecraft:block.note_block.pling", SoundCategory.MASTER, 1.0f, 2.0f);
-                                }else if (delay == 4L) {
+                                } else if (delay == 4L) {
                                     player.playSound(player.getLocation(), "minecraft:block.note_block.pling", SoundCategory.MASTER, 1.0f, 2.0f);
                                 }
                                 slot++;
                             }
-                            if (slot==3) {
+                            if (slot == 3) {
                                 delay = 1L;
-                            }else if (slot==11) {
+                            } else if (slot == 11) {
                                 delay = 4L;
                             }
                             currentTick++;
                             if (slot >= PANE_SLOTS.length) {
-                                for (int i = 0; i < PANE_SLOTS2.length; i++) {
-                                    enhancementInventory.setItem(PANE_SLOTS2[i], InvenDecoSuccess_STAINED_GLASS_PANE());
+                                // 확률 계산
+                                double successChance;
+                                double failChance;
+                                double destroyChance;
+                                if (starCount == 0) {
+                                    successChance = 0.9;
+                                    failChance = 0.1;
+                                    destroyChance = 0.0;
+                                } else if (starCount == 1) {
+                                    successChance = 0.85;
+                                    failChance = 0.15;
+                                    destroyChance = 0.0;
+                                } else if (starCount == 2) {
+                                    successChance = 0.75;
+                                    failChance = 0.25;
+                                    destroyChance = 0.0;
+                                } else if (starCount == 3) {
+                                    successChance = 0.65;
+                                    failChance = 0.35;
+                                    destroyChance = 0.0;
+                                } else if (starCount == 4) {
+                                    successChance = 0.55;
+                                    failChance = 0.45;
+                                    destroyChance = 0.0;
+                                } else if (starCount == 5) {
+                                    successChance = 0.45;
+                                    failChance = 0.55;
+                                    destroyChance = 0.0;
+                                } else if (starCount == 6) {
+                                    successChance = 0.35;
+                                    failChance = 0.65;
+                                    destroyChance = 0.1;
+                                } else if (starCount == 7) {
+                                    successChance = 0.3;
+                                    failChance = 0.67;
+                                    destroyChance = 0.03;
+                                } else if (starCount == 8) {
+                                    successChance = 0.2;
+                                    failChance = 0.73;
+                                    destroyChance = 0.07;
+                                } else if (starCount == 9) {
+                                    successChance = 0.03;
+                                    failChance = 0.77;
+                                    destroyChance = 0.2;
+                                } else {
+                                    successChance = 0.0;
+                                    failChance = 0.0;
+                                    destroyChance = 0.0;
                                 }
-                                ItemMeta itemMeta1 = targetSlotItem.getItemMeta();
-                                // 기존 공격력 가져오기
-                                double baseDamage = 0.0;
-                                if (itemMeta1 != null && itemMeta1.hasAttributeModifiers()) {
-                                    Collection<AttributeModifier> modifiers1 = itemMeta1.getAttributeModifiers(Attribute.GENERIC_ATTACK_DAMAGE);
-                                    player.sendMessage(modifiers1.toString());
-                                    if (modifiers1 != null) {
-                                        for (AttributeModifier modifier : modifiers1) {
-                                            if (modifier.getOperation() == AttributeModifier.Operation.ADD_NUMBER) {
-                                                baseDamage = modifier.getAmount();
-                                                break;
+
+                                // 강화 결과 계산
+                                double randomNum = Math.random();
+                                if (randomNum < successChance) {
+                                    // 성공
+                                    for (int i = 0; i < PANE_SLOTS2.length; i++) {
+                                        enhancementInventory.setItem(PANE_SLOTS2[i], InvenDecoSuccess_STAINED_GLASS_PANE());
+                                    }
+                                    // 공격력 증가 로직 추가
+                                    double baseDamage = 0.0;
+                                    if (itemMeta1 != null && itemMeta1.hasAttributeModifiers()) {
+                                        Collection<AttributeModifier> modifiers1 = itemMeta1.getAttributeModifiers(Attribute.GENERIC_ATTACK_DAMAGE);
+                                        if (modifiers1 != null) {
+                                            for (AttributeModifier modifier : modifiers1) {
+                                                if (modifier.getOperation() == AttributeModifier.Operation.ADD_NUMBER) {
+                                                    baseDamage = modifier.getAmount();
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
-                                }
-                                // 공격력 증가를 위한 상수 값을 설정 (원하는 만큼 수정 가능)
-                                double increaseAmount = 0.5;
-                                String originalName=null;
-                                // 공격력을 증가시키는 로직
-                                double newDamage = baseDamage + increaseAmount;
-                                if (newDamage<4){
-                                    if (targetSlotItem.getType()==Material.WOODEN_SWORD){
-                                        newDamage=4.5;
-                                    }
-                                    if (targetSlotItem.getType()==Material.STONE_SWORD){
-                                        newDamage=5.5;
-                                    }
-                                    if (targetSlotItem.getType()==Material.GOLDEN_SWORD){
-                                        newDamage=4.5;
-                                    }
-                                    if (targetSlotItem.getType()==Material.IRON_SWORD){
-                                        newDamage=6.5;
-                                    }
-                                    if (targetSlotItem.getType()==Material.DIAMOND_SWORD){
-                                        newDamage=7.5;
-                                    }
-                                    if (targetSlotItem.getType()==Material.NETHERITE_SWORD){
-                                        newDamage=8.5;
-                                    }
-                                }
-                                // 별모양 추가
-                                List<String> lore = itemMeta1.getLore();
-                                lore.add("§e★");
-                                itemMeta1.setLore(lore);
-                                // 강화된 아이템의 이름 설정
-                                // targetSlotItem의 ItemMeta를 수정하여 공격력을 갱신
-                                if (itemMeta1 != null) {
-                                    AttributeModifier newModifier = new AttributeModifier(UUID.randomUUID(), "weapon_damage", newDamage, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND);
-                                    itemMeta1.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE);
-                                    itemMeta1.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, newModifier);
-                                    targetSlotItem.setItemMeta(itemMeta1);
-                                }
-                                enhancementInventory.setItem(10, null);
-                                enhancementInventory.setItem(16, targetSlotItem);
-                                cancel();
-                            }
 
+                                    double increaseAmount = 0.5;
+                                    double newDamage = baseDamage + increaseAmount;
+                                    if (newDamage < 4) {
+                                        // 원하는 값으로 수정 가능
+                                        if (targetSlotItem.getType() == Material.WOODEN_SWORD) {
+                                            newDamage = 4.5;
+                                        }
+                                        if (targetSlotItem.getType() == Material.STONE_SWORD) {
+                                            newDamage = 5.5;
+                                        }
+                                        if (targetSlotItem.getType() == Material.GOLDEN_SWORD) {
+                                            newDamage = 4.5;
+                                        }
+                                        if (targetSlotItem.getType() == Material.IRON_SWORD) {
+                                            newDamage = 6.5;
+                                        }
+                                        if (targetSlotItem.getType() == Material.DIAMOND_SWORD) {
+                                            newDamage = 7.5;
+                                        }
+                                        if (targetSlotItem.getType() == Material.NETHERITE_SWORD) {
+                                            newDamage = 8.5;
+                                        }
+                                    }
+
+                                    List<String> lore = itemMeta1.getLore();
+                                    if (lore == null) {
+                                        lore = new ArrayList<>();
+                                    }
+
+                                    String firstLine = null;
+                                    if (!lore.isEmpty()) {
+                                        firstLine = lore.get(0);
+                                    }
+
+                                    // 첫 번째 줄이 비어 있지 않다면 별을 추가합니다.
+                                    if (firstLine != null) {
+                                        StringBuilder newLine = new StringBuilder(firstLine);
+                                        newLine.append("§e★");
+                                        lore.set(0, newLine.toString());
+                                    } else {
+                                        lore.add(0, "§e★");
+                                    }
+
+                                    itemMeta1.setLore(lore);
+
+                                    // targetSlotItem의 ItemMeta를 수정하여 공격력을 갱신
+                                    if (itemMeta1 != null) {
+                                        AttributeModifier newModifier = new AttributeModifier(UUID.randomUUID(), "weapon_damage", newDamage, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND);
+                                        itemMeta1.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE);
+                                        itemMeta1.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, newModifier);
+                                        targetSlotItem.setItemMeta(itemMeta1);
+                                    }
+                                    if (starCount==9){
+                                        // 강화 10강 성공 시 서버 월드에 메시지 출력
+                                        String message = "§l§e[!] §a모두 축하해 주세요! "+player.getName() + "님이 강화 §510강§a에 성공하였습니다!";
+                                        player.sendTitle("§l§e★ 축 하 ★", "§l§e"+player.getName() +"님이 강화 §l§510강§l§a에 성공하였습니다!", 10, 140, 10);
+                                        Bukkit.getServer().broadcastMessage(message);
+                                        // 월드 내 모든 플레이어에게 사운드 출력
+                                        Sound sound = Sound.UI_TOAST_CHALLENGE_COMPLETE;
+                                        float volume = 2.0f;
+                                        float pitch = 1.0f;
+
+                                        for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
+                                            onlinePlayer.playSound(onlinePlayer.getLocation(), sound, volume, pitch);
+                                        }
+                                    }else {
+                                        player.playSound(player.getLocation(), "minecraft:block.anvil.use", SoundCategory.MASTER, 1.0f, 1.0f);
+                                    }
+                                    enhancementInventory.setItem(10, null);
+                                    enhancementInventory.setItem(16, targetSlotItem);
+                                    cancel();
+                                } else if (randomNum < successChance + failChance) {
+                                    // 실패
+                                    for (int i = 0; i < PANE_SLOTS2.length; i++) {
+                                        enhancementInventory.setItem(PANE_SLOTS2[i], InvenDecoRED_STAINED_GLASS_PANE());
+                                    }
+                                    player.playSound(player.getLocation(), "minecraft:block.note_block.bass", SoundCategory.MASTER, 2.0f, 1.0f);
+                                    cancel();
+                                } else {
+                                    // 파괴
+                                    for (int i = 0; i < PANE_SLOTS2.length; i++) {
+                                        enhancementInventory.setItem(PANE_SLOTS2[i], InvenDecoRED_STAINED_GLASS_PANE());
+                                    }
+                                    player.playSound(player.getLocation(), "minecraft:block.anvil.destroy", SoundCategory.MASTER, 1.0f, 1.0f);
+                                    enhancementInventory.setItem(10, null);
+                                    cancel();
+                                }
+                            }
                         }
                     }.runTaskTimer(plugin, 1L, 4L);
                 }
             }
-            if (event.getSlot() == 16){
+            if (event.getSlot() == 16) {
                 ItemStack itemInSlot16 = event.getCurrentItem();
                 player.getInventory().addItem(itemInSlot16);
                 player.closeInventory();
             }
         }
+
     }
 //    private String Name(String name){
 //        switch (name){
