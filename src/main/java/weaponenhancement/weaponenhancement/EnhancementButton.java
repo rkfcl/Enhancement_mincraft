@@ -7,7 +7,6 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -199,8 +198,14 @@ public class EnhancementButton implements Listener {
                                             }
                                         }
                                     }
-
                                     double increaseAmount = 0.5;
+                                    if (starCount==7){
+                                        increaseAmount = 1.0;
+                                    } else if (starCount==8) {
+                                        increaseAmount = 1.5;
+                                    } else if (starCount==8) {
+                                        increaseAmount = 3.0;
+                                    }
                                     double newDamage = baseDamage + increaseAmount;
                                     if (newDamage < 4) {
                                         // 원하는 값으로 수정 가능
@@ -292,37 +297,6 @@ public class EnhancementButton implements Listener {
                     }.runTaskTimer(plugin, 1L, 4L);
                 }
             }
-            if (event.getSlot() == 16) {
-                ItemStack itemInSlot16 = event.getCurrentItem();
-                player.getInventory().addItem(itemInSlot16);
-                player.closeInventory();
-            }
         }
-
     }
-//    private String Name(String name){
-//        switch (name){
-//            case "WOODEN_SWORD":
-//                name="나무 검§e ";
-//                break;
-//            case "STONE_SWORD":
-//                name="돌 검§e ";
-//                break;
-//            case "GOLDEN_SWORD":
-//                name="금 검§e ";
-//                break;
-//            case "IRON_SWORD":
-//                name="철 검§e ";
-//                break;
-//            case "DIAMOND_SWORD":
-//                name="다이아몬드 검§e ";
-//                break;
-//            case "NETHERITE_SWORD":
-//                name="네더라이트 검§e ";
-//                break;
-//            default:
-//                break;
-//        }
-//        return  name;
-//    }
 }
