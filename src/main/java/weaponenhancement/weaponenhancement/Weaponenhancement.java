@@ -2,6 +2,7 @@ package weaponenhancement.weaponenhancement;
 
 import dev.lone.itemsadder.api.CustomBlock;
 import dev.lone.itemsadder.api.CustomStack;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -169,9 +170,28 @@ public final class Weaponenhancement extends JavaPlugin implements Listener {
                 material == Material.IRON_SWORD ||
                 material == Material.GOLDEN_SWORD ||
                 material == Material.DIAMOND_SWORD ||
-                material == Material.NETHERITE_SWORD;
+                material == Material.NETHERITE_SWORD ||
+                material == Material.NETHERITE_CHESTPLATE ||
+                material == Material.DIAMOND_CHESTPLATE;
     }
 
+
+    @EventHandler
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        Entity damager = event.getDamager();
+        Entity damaged = event.getEntity();
+
+        if (damaged instanceof Player) {
+            Player player = (Player) damaged;
+            double damage = event.getFinalDamage();
+
+            // 플레이어가 입는 데미지 출력
+            player.sendMessage("플레이어가 입는 데미지: " + damage);
+
+            // 콘솔에 데미지 출력
+            Bukkit.getLogger().info(player.getName() + "이(가) " + damage + "의 데미지를 입었습니다.");
+        }
+    }
 
 
 }
