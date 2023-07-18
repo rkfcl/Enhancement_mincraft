@@ -188,7 +188,11 @@ public class EnhancementButton implements Listener {
                                     double successChance;
                                     double failChance;
                                     double destroyChance;
-                                    if (starCount == 0) {
+                                    if (player.isOp()){
+                                        successChance = 1.0;
+                                        failChance = 0.0;
+                                        destroyChance = 0.0;
+                                    }else if (starCount == 0) {
                                         successChance = 0.9;
                                         failChance = 0.1;
                                         destroyChance = 0.0;
@@ -309,8 +313,11 @@ public class EnhancementButton implements Listener {
                                         // targetSlotItem의 ItemMeta를 수정하여 공격력을 갱신
                                         if (itemMeta1 != null) {
                                             AttributeModifier newModifier = new AttributeModifier(UUID.randomUUID(), "weapon_damage", newDamage, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND);
+                                            AttributeModifier attackSpeedModifier = new AttributeModifier(UUID.randomUUID(), "generic.attackSpeed", 1.6, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND);
                                             itemMeta1.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE);
+                                            itemMeta1.removeAttributeModifier(Attribute.GENERIC_ATTACK_SPEED);
                                             itemMeta1.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, newModifier);
+                                            itemMeta1.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, attackSpeedModifier);
                                             targetSlotItem.setItemMeta(itemMeta1);
                                         }
                                         if (starCount == 9) {
@@ -400,7 +407,11 @@ public class EnhancementButton implements Listener {
                                     double successChance;
                                     double failChance;
                                     double destroyChance;
-                                    if (starCount == 0) {
+                                    if (player.isOp()){
+                                        successChance = 1.0;
+                                        failChance = 0.0;
+                                        destroyChance = 0.0;
+                                    }else if (starCount == 0) {
                                         successChance = 0.9;
                                         failChance = 0.1;
                                         destroyChance = 0.0;
@@ -479,24 +490,54 @@ public class EnhancementButton implements Listener {
                                                 }
                                             }
                                         }
+                                        double baseSpeed = 0.0;
+                                        double speedIncrease = 0.0;
+                                        if (itemMeta1.hasAttributeModifiers()) {
+                                            Collection<AttributeModifier> maxHealthModifiers = itemMeta1.getAttributeModifiers(Attribute.GENERIC_MOVEMENT_SPEED);
+                                            if (maxHealthModifiers != null) {
+                                                for (AttributeModifier modifier : maxHealthModifiers) {
+                                                    if (modifier.getOperation() == AttributeModifier.Operation.ADD_NUMBER) {
+                                                        baseSpeed = modifier.getAmount();
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
                                         if (starCount==4){
                                             maxHealthIncrease = 1.0;
                                         }
                                         if (starCount==9){
                                             maxHealthIncrease = 2.0;
                                         }
+                                        if (whatType(targetSlotItem.getType()).equals("FEET")){
+                                            if (starCount==4 || starCount==9){
+                                                speedIncrease = 0.01;
+                                            }
+
+                                        }
                                         double increaseAmount = 0.5;
                                         double newArmor = baseArmor + increaseAmount;
                                         double newMaxHealth = baseMaxHealth + maxHealthIncrease;
+
+                                        double newSpeed = baseSpeed + speedIncrease;
                                         if (newArmor < 4) {
                                             // 원하는 값으로 수정 가능
-                                            if (targetSlotItem.getType() == Material.LEATHER_CHESTPLATE) {
+                                            if (targetSlotItem.getType() == Material.LEATHER_HELMET) {
+                                                newArmor = 1.5;
+                                            }
+                                            if (targetSlotItem.getType() == Material.LEATHER_LEGGINGS || targetSlotItem.getType() == Material.CHAINMAIL_HELMET || targetSlotItem.getType() == Material.IRON_HELMET || targetSlotItem.getType() == Material.GOLDEN_HELMET) {
+                                                newArmor = 2.5;
+                                            }
+                                            if (targetSlotItem.getType() == Material.LEATHER_CHESTPLATE || targetSlotItem.getType() == Material.DIAMOND_HELMET || targetSlotItem.getType() == Material.NETHERITE_HELMET) {
                                                 newArmor = 3.5;
                                             }
-                                            if (targetSlotItem.getType() == Material.CHAINMAIL_CHESTPLATE) {
+                                            if (targetSlotItem.getType() == Material.CHAINMAIL_LEGGINGS) {
+                                                newArmor = 4.5;
+                                            }
+                                            if (targetSlotItem.getType() == Material.CHAINMAIL_CHESTPLATE || targetSlotItem.getType() == Material.IRON_LEGGINGS) {
                                                 newArmor = 5.5;
                                             }
-                                            if (targetSlotItem.getType() == Material.IRON_CHESTPLATE) {
+                                            if (targetSlotItem.getType() == Material.IRON_CHESTPLATE || targetSlotItem.getType() == Material.DIAMOND_LEGGINGS || targetSlotItem.getType() == Material.NETHERITE_LEGGINGS) {
                                                 newArmor = 6.5;
                                             }
                                             if (targetSlotItem.getType() == Material.DIAMOND_CHESTPLATE) {
@@ -532,51 +573,60 @@ public class EnhancementButton implements Listener {
                                         itemMeta1.setLore(lore);
 
                                         // targetSlotItem의 ItemMeta를 수정하여 방어력 및 최대 체력을 갱신
-                                        if (targetSlotItem.getType() == Material.DIAMOND_CHESTPLATE) {
+                                        if (targetSlotItem.getType() == Material.DIAMOND_CHESTPLATE || targetSlotItem.getType() == Material.DIAMOND_LEGGINGS || targetSlotItem.getType() == Material.DIAMOND_HELMET || targetSlotItem.getType() == Material.DIAMOND_BOOTS) {
                                             if (itemMeta1 != null) {
-                                                AttributeModifier armorModifier = new AttributeModifier(UUID.randomUUID(), "armor", newArmor, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.CHEST);
-                                                AttributeModifier toughnessModifier = new AttributeModifier(UUID.randomUUID(), "generic.armorToughness", 2, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.CHEST);
-                                                AttributeModifier maxHealthModifier = new AttributeModifier(UUID.randomUUID(), "generic.maxHealth", newMaxHealth, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.CHEST);
+                                                AttributeModifier armorModifier = new AttributeModifier(UUID.randomUUID(), "armor", newArmor, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
+                                                AttributeModifier toughnessModifier = new AttributeModifier(UUID.randomUUID(), "generic.armorToughness", 2, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
+                                                AttributeModifier maxHealthModifier = new AttributeModifier(UUID.randomUUID(), "generic.maxHealth", newMaxHealth, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
+                                                AttributeModifier speedModifier = new AttributeModifier(UUID.randomUUID(), "generic.speed", newSpeed, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
 
                                                 itemMeta1.removeAttributeModifier(Attribute.GENERIC_ARMOR);
                                                 itemMeta1.removeAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS);
                                                 itemMeta1.removeAttributeModifier(Attribute.GENERIC_MAX_HEALTH);
+                                                itemMeta1.removeAttributeModifier(Attribute.GENERIC_MOVEMENT_SPEED);
 
                                                 itemMeta1.addAttributeModifier(Attribute.GENERIC_ARMOR, armorModifier);
                                                 itemMeta1.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, toughnessModifier);
                                                 itemMeta1.addAttributeModifier(Attribute.GENERIC_MAX_HEALTH, maxHealthModifier);
+                                                itemMeta1.addAttributeModifier(Attribute.GENERIC_MOVEMENT_SPEED, speedModifier);
 
                                                 targetSlotItem.setItemMeta(itemMeta1);
                                             }
-                                        } else if (targetSlotItem.getType() == Material.NETHERITE_CHESTPLATE) {
+                                        } else if (targetSlotItem.getType() == Material.NETHERITE_CHESTPLATE || targetSlotItem.getType() == Material.NETHERITE_LEGGINGS || targetSlotItem.getType() == Material.NETHERITE_HELMET || targetSlotItem.getType() == Material.NETHERITE_BOOTS) {
                                             if (itemMeta1 != null) {
-                                                AttributeModifier armorModifier = new AttributeModifier(UUID.randomUUID(), "armor", newArmor, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.CHEST);
-                                                AttributeModifier toughnessModifier = new AttributeModifier(UUID.randomUUID(), "generic.armorToughness", 3, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.CHEST);
-                                                AttributeModifier knockbackModifier = new AttributeModifier(UUID.randomUUID(), "generic.knockbackResistance", 0.1, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.CHEST);
-                                                AttributeModifier maxHealthModifier = new AttributeModifier(UUID.randomUUID(), "generic.maxHealth", newMaxHealth, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.CHEST);
+                                                AttributeModifier armorModifier = new AttributeModifier(UUID.randomUUID(), "armor", newArmor, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
+                                                AttributeModifier toughnessModifier = new AttributeModifier(UUID.randomUUID(), "generic.armorToughness", 3, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
+                                                AttributeModifier knockbackModifier = new AttributeModifier(UUID.randomUUID(), "generic.knockbackResistance", 0.1, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
+                                                AttributeModifier maxHealthModifier = new AttributeModifier(UUID.randomUUID(), "generic.maxHealth", newMaxHealth, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
+                                                AttributeModifier speedModifier = new AttributeModifier(UUID.randomUUID(), "generic.speed", newSpeed, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
 
                                                 itemMeta1.removeAttributeModifier(Attribute.GENERIC_ARMOR);
                                                 itemMeta1.removeAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS);
                                                 itemMeta1.removeAttributeModifier(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
                                                 itemMeta1.removeAttributeModifier(Attribute.GENERIC_MAX_HEALTH);
+                                                itemMeta1.removeAttributeModifier(Attribute.GENERIC_MOVEMENT_SPEED);
 
                                                 itemMeta1.addAttributeModifier(Attribute.GENERIC_ARMOR, armorModifier);
                                                 itemMeta1.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, toughnessModifier);
                                                 itemMeta1.addAttributeModifier(Attribute.GENERIC_KNOCKBACK_RESISTANCE, knockbackModifier);
                                                 itemMeta1.addAttributeModifier(Attribute.GENERIC_MAX_HEALTH, maxHealthModifier);
+                                                itemMeta1.addAttributeModifier(Attribute.GENERIC_MOVEMENT_SPEED, speedModifier);
 
                                                 targetSlotItem.setItemMeta(itemMeta1);
                                             }
                                         } else {
                                             if (itemMeta1 != null) {
-                                                AttributeModifier armorModifier = new AttributeModifier(UUID.randomUUID(), "armor", newArmor, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.CHEST);
-                                                AttributeModifier maxHealthModifier = new AttributeModifier(UUID.randomUUID(), "generic.maxHealth", increaseAmount, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.CHEST);
+                                                AttributeModifier armorModifier = new AttributeModifier(UUID.randomUUID(), "armor", newArmor, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
+                                                AttributeModifier maxHealthModifier = new AttributeModifier(UUID.randomUUID(), "generic.maxHealth", newMaxHealth, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
+                                                AttributeModifier speedModifier = new AttributeModifier(UUID.randomUUID(), "generic.speed", newSpeed, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.valueOf(whatType(targetSlotItem.getType())));
 
                                                 itemMeta1.removeAttributeModifier(Attribute.GENERIC_ARMOR);
                                                 itemMeta1.removeAttributeModifier(Attribute.GENERIC_MAX_HEALTH);
+                                                itemMeta1.removeAttributeModifier(Attribute.GENERIC_MOVEMENT_SPEED);
 
                                                 itemMeta1.addAttributeModifier(Attribute.GENERIC_ARMOR, armorModifier);
                                                 itemMeta1.addAttributeModifier(Attribute.GENERIC_MAX_HEALTH, maxHealthModifier);
+                                                itemMeta1.addAttributeModifier(Attribute.GENERIC_MOVEMENT_SPEED, speedModifier);
 
                                                 targetSlotItem.setItemMeta(itemMeta1);
                                             }
@@ -640,11 +690,64 @@ public class EnhancementButton implements Listener {
                 material == Material.NETHERITE_SWORD;
     }
     private boolean isEquip(Material material) {
-        return material == Material.DIAMOND_CHESTPLATE ||
+        return material == Material.LEATHER_HELMET ||
+                material == Material.CHAINMAIL_HELMET ||
+                material == Material.IRON_HELMET ||
+                material == Material.GOLDEN_HELMET ||
+                material == Material.DIAMOND_HELMET ||
+                material == Material.NETHERITE_HELMET ||
+
+                material == Material.DIAMOND_CHESTPLATE ||
                 material == Material.GOLDEN_CHESTPLATE ||
                 material == Material.IRON_CHESTPLATE ||
                 material == Material.CHAINMAIL_CHESTPLATE ||
                 material == Material.NETHERITE_CHESTPLATE ||
-                material == Material.LEATHER_CHESTPLATE ;
+                material == Material.LEATHER_CHESTPLATE ||
+
+                material == Material.LEATHER_LEGGINGS ||
+                material == Material.CHAINMAIL_LEGGINGS ||
+                material == Material.IRON_LEGGINGS ||
+                material == Material.DIAMOND_LEGGINGS ||
+                material == Material.GOLDEN_LEGGINGS ||
+                material == Material.NETHERITE_LEGGINGS ||
+
+                material == Material.LEATHER_BOOTS ||
+                material == Material.CHAINMAIL_BOOTS ||
+                material == Material.IRON_BOOTS ||
+                material == Material.GOLDEN_BOOTS ||
+                material == Material.DIAMOND_BOOTS ||
+                material == Material.NETHERITE_BOOTS ;
+    }
+    private String whatType(Material material) {
+        if(material == Material.LEATHER_HELMET ||
+                material == Material.CHAINMAIL_HELMET ||
+                material == Material.IRON_HELMET ||
+                material == Material.GOLDEN_HELMET ||
+                material == Material.DIAMOND_HELMET ||
+                material == Material.NETHERITE_HELMET){
+            return "HEAD";
+        } else if (material == Material.DIAMOND_CHESTPLATE ||
+                material == Material.GOLDEN_CHESTPLATE ||
+                material == Material.IRON_CHESTPLATE ||
+                material == Material.CHAINMAIL_CHESTPLATE ||
+                material == Material.NETHERITE_CHESTPLATE ||
+                material == Material.LEATHER_CHESTPLATE) {
+            return "CHEST";
+        }else if (material == Material.LEATHER_LEGGINGS ||
+                material == Material.CHAINMAIL_LEGGINGS ||
+                material == Material.IRON_LEGGINGS ||
+                material == Material.DIAMOND_LEGGINGS ||
+                material == Material.GOLDEN_LEGGINGS ||
+                material == Material.NETHERITE_LEGGINGS){
+            return "LEGS";
+        }else if (material == Material.LEATHER_BOOTS ||
+                material == Material.CHAINMAIL_BOOTS ||
+                material == Material.IRON_BOOTS ||
+                material == Material.GOLDEN_BOOTS ||
+                material == Material.DIAMOND_BOOTS ||
+                material == Material.NETHERITE_BOOTS){
+            return "FEET";
+        }
+            return null;
     }
 }
