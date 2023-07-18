@@ -49,7 +49,7 @@ public final class Weaponenhancement extends JavaPlugin implements Listener {
         Block clickedBlock = event.getClickedBlock();
         CustomBlock custom = CustomBlock.getInstance("enhancement_anvil");
 
-        if (clickedBlock != null || clickedBlock.getBlockData().equals(custom.getBaseBlockData())) {
+        if (clickedBlock != null && clickedBlock.getBlockData().equals(custom.getBaseBlockData())) {
             enhancementInventory.openEnhancementInventory(player);
         }
 
