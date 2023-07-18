@@ -29,6 +29,7 @@ public class EnhancementButton implements Listener {
     EnhancementInventory inventory;
     private final int[] PANE_SLOTS = {38, 37, 28, 20, 19, 18, 9, 0, 1, 2, 11, 12, 13};
     private final int[] PANE_SLOTS2 = {14, 15, 6, 7, 8, 17, 26, 25, 24};
+    private Map<Player, Boolean> enhancementStatusMap = new HashMap<>(); // 강화 동작 여부를 저장하는 변수
     public EnhancementButton(Weaponenhancement plugin) {
         this.plugin = plugin;
     }
@@ -37,6 +38,7 @@ public class EnhancementButton implements Listener {
     public void ShopMenuInventory(InventoryClickEvent event) {
         Inventory clickedInventory = event.getClickedInventory();
         Player player = (Player) event.getWhoClicked();
+        Boolean enhancementStatus = enhancementStatusMap.get(player);
         ClickType clickType = event.getClick();
 
         if (clickedInventory == null) return;
@@ -56,7 +58,8 @@ public class EnhancementButton implements Listener {
                 event.setCancelled(true); // 이벤트 취소하여 아이템을 옮기지 못하도록 함
                 return;
             }
-            if (event.getSlot() == 43) {
+            if (event.getSlot() == 43 && (enhancementStatus == null || !enhancementStatus)) {
+                enhancementStatusMap.put(player,true);
                 if (targetSlotItem != null && targetSlotItem2 != null) {
                     enhancementInventory.setItem(0, InvenDecoGray_STAINED_GLASS_PANE());
                     enhancementInventory.setItem(1, InvenDecoGray_STAINED_GLASS_PANE());
@@ -338,6 +341,7 @@ public class EnhancementButton implements Listener {
                                         }
                                         enhancementInventory.setItem(10, null);
                                         enhancementInventory.setItem(16, targetSlotItem);
+                                        enhancementStatusMap.put(player, false);
                                         cancel();
                                     } else if (randomNum < successChance + failChance) {
                                         // 실패
@@ -345,6 +349,7 @@ public class EnhancementButton implements Listener {
                                             enhancementInventory.setItem(PANE_SLOTS2[i], InvenDecoRED_STAINED_GLASS_PANE());
                                         }
                                         player.playSound(player.getLocation(), "minecraft:block.note_block.bass", SoundCategory.MASTER, 2.0f, 1.0f);
+                                        enhancementStatusMap.put(player, false);
                                         cancel();
                                     } else {
                                         // 파괴
@@ -353,6 +358,7 @@ public class EnhancementButton implements Listener {
                                         }
                                         player.playSound(player.getLocation(), "minecraft:block.anvil.destroy", SoundCategory.MASTER, 1.0f, 1.0f);
                                         enhancementInventory.setItem(10, null);
+                                        enhancementStatusMap.put(player, false);
                                         cancel();
                                     }
                                 }
@@ -651,6 +657,7 @@ public class EnhancementButton implements Listener {
                                         }
                                         enhancementInventory.setItem(10, null);
                                         enhancementInventory.setItem(16, targetSlotItem);
+                                        enhancementStatusMap.put(player, false);
                                         cancel();
                                     } else if (randomNum < successChance + failChance) {
                                         // 실패
@@ -658,6 +665,7 @@ public class EnhancementButton implements Listener {
                                             enhancementInventory.setItem(PANE_SLOTS2[i], InvenDecoRED_STAINED_GLASS_PANE());
                                         }
                                         player.playSound(player.getLocation(), "minecraft:block.note_block.bass", SoundCategory.MASTER, 2.0f, 1.0f);
+                                        enhancementStatusMap.put(player, false);
                                         cancel();
                                     } else {
                                         // 파괴
@@ -666,6 +674,7 @@ public class EnhancementButton implements Listener {
                                         }
                                         player.playSound(player.getLocation(), "minecraft:block.anvil.destroy", SoundCategory.MASTER, 1.0f, 1.0f);
                                         enhancementInventory.setItem(10, null);
+                                        enhancementStatusMap.put(player, false);
                                         cancel();
                                     }
                                 }

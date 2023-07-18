@@ -49,11 +49,10 @@ public final class Weaponenhancement extends JavaPlugin implements Listener {
         Block clickedBlock = event.getClickedBlock();
         CustomBlock custom = CustomBlock.getInstance("enhancement_anvil");
 
-        if (clickedBlock == null || !clickedBlock.getBlockData().equals(custom.getBaseBlockData())) {
-            return;
+        if (clickedBlock != null || clickedBlock.getBlockData().equals(custom.getBaseBlockData())) {
+            enhancementInventory.openEnhancementInventory(player);
         }
 
-        enhancementInventory.openEnhancementInventory(player);
     }
     @EventHandler
     public void ShopMenuInventory(InventoryClickEvent event) {
@@ -203,22 +202,22 @@ public final class Weaponenhancement extends JavaPlugin implements Listener {
 
 
 
-    @EventHandler
-    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        Entity damager = event.getDamager();
-        Entity damaged = event.getEntity();
-
-        if (damaged instanceof Player) {
-            Player player = (Player) damaged;
-            double damage = event.getFinalDamage();
-
-            // 플레이어가 입는 데미지 출력
-            player.sendMessage("플레이어가 입는 데미지: " + damage);
-
-            // 콘솔에 데미지 출력
-            Bukkit.getLogger().info(player.getName() + "이(가) " + damage + "의 데미지를 입었습니다.");
-        }
-    }
+//    @EventHandler
+//    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+//        Entity damager = event.getDamager();
+//        Entity damaged = event.getEntity();
+//
+//        if (damaged instanceof Player) {
+//            Player player = (Player) damaged;
+//            double damage = event.getFinalDamage();
+//
+//            // 플레이어가 입는 데미지 출력
+//            player.sendMessage("플레이어가 입는 데미지: " + damage);
+//
+//            // 콘솔에 데미지 출력
+//            Bukkit.getLogger().info(player.getName() + "이(가) " + damage + "의 데미지를 입었습니다.");
+//        }
+//    }
 
 
 }
