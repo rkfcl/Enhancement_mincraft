@@ -107,20 +107,6 @@ public final class Weaponenhancement extends JavaPlugin implements Listener {
             }
         }
     }
-
-//    @EventHandler
-//    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-//        Entity damager = event.getDamager();
-//        Entity damaged = event.getEntity();
-//
-//        if (damager instanceof Player) {
-//            Player player = (Player) damager;
-//            double damage = event.getDamage();
-//
-//            // 플레이어가 가하는 데미지 출력
-//            System.out.println(player.getName() + "이(가) " + damaged.getName() + "에게 " + damage + "의 데미지를 가했습니다.");
-//        }
-//    }
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         Inventory inventory = event.getInventory();
@@ -128,6 +114,7 @@ public final class Weaponenhancement extends JavaPlugin implements Listener {
 
         if (inventory.getType() == InventoryType.CHEST && event.getView().getTitle().equalsIgnoreCase("강화")) {
             ItemStack itemInSlot10 = inventory.getItem(10);
+            ItemStack itemInSlot16 = inventory.getItem(16);
             ItemStack itemInSlot39 = inventory.getItem(39);
 
             if (itemInSlot10 != null) {
@@ -137,6 +124,14 @@ public final class Weaponenhancement extends JavaPlugin implements Listener {
                     player.getInventory().addItem(itemInSlot10);
                 }
                 inventory.setItem(10, null);
+            }
+            if (itemInSlot16 != null) {
+                if (isInventoryFull(player.getInventory())) {
+                    player.getWorld().dropItem(player.getLocation(), itemInSlot16);
+                } else {
+                    player.getInventory().addItem(itemInSlot16);
+                }
+                inventory.setItem(16, null);
             }
 
             if (itemInSlot39 != null) {
@@ -159,8 +154,6 @@ public final class Weaponenhancement extends JavaPlugin implements Listener {
         }
         return true;
     }
-
-
 
     // 검 아이템인지 확인하는 유틸리티 메소드
     private boolean isEquip(Material material) {
@@ -199,25 +192,4 @@ public final class Weaponenhancement extends JavaPlugin implements Listener {
                 material == Material.DIAMOND_BOOTS ||
                 material == Material.NETHERITE_BOOTS;
     }
-
-
-
-//    @EventHandler
-//    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-//        Entity damager = event.getDamager();
-//        Entity damaged = event.getEntity();
-//
-//        if (damaged instanceof Player) {
-//            Player player = (Player) damaged;
-//            double damage = event.getFinalDamage();
-//
-//            // 플레이어가 입는 데미지 출력
-//            player.sendMessage("플레이어가 입는 데미지: " + damage);
-//
-//            // 콘솔에 데미지 출력
-//            Bukkit.getLogger().info(player.getName() + "이(가) " + damage + "의 데미지를 입었습니다.");
-//        }
-//    }
-
-
 }
